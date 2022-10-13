@@ -1,0 +1,15 @@
+/home/deep42/C#/TicTacToe/bin/Debug/net6.0/TicTacToe
+/home/deep42/C#/TicTacToe/bin/Debug/net6.0/TicTacToe.deps.json
+/home/deep42/C#/TicTacToe/bin/Debug/net6.0/TicTacToe.runtimeconfig.json
+/home/deep42/C#/TicTacToe/bin/Debug/net6.0/TicTacToe.dll
+/home/deep42/C#/TicTacToe/bin/Debug/net6.0/TicTacToe.pdb
+/home/deep42/C#/TicTacToe/obj/Debug/net6.0/TicTacToe.csproj.AssemblyReference.cache
+/home/deep42/C#/TicTacToe/obj/Debug/net6.0/TicTacToe.GeneratedMSBuildEditorConfig.editorconfig
+/home/deep42/C#/TicTacToe/obj/Debug/net6.0/TicTacToe.AssemblyInfoInputs.cache
+/home/deep42/C#/TicTacToe/obj/Debug/net6.0/TicTacToe.AssemblyInfo.cs
+/home/deep42/C#/TicTacToe/obj/Debug/net6.0/TicTacToe.csproj.CoreCompileInputs.cache
+/home/deep42/C#/TicTacToe/obj/Debug/net6.0/TicTacToe.dll
+/home/deep42/C#/TicTacToe/obj/Debug/net6.0/refint/TicTacToe.dll
+/home/deep42/C#/TicTacToe/obj/Debug/net6.0/TicTacToe.pdb
+/home/deep42/C#/TicTacToe/obj/Debug/net6.0/TicTacToe.genruntimeconfig.cache
+/home/deep42/C#/TicTacToe/obj/Debug/net6.0/ref/TicTacToe.dll
