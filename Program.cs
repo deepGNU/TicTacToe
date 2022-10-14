@@ -278,7 +278,6 @@ namespace TicTacToe
         public HumanPlayer(Board board, string letter)
         {
             GameBoard = board;
-            // Name = name;
             Letter = letter;
         }
 
@@ -300,6 +299,8 @@ namespace TicTacToe
     class MiniMaxPlayer : Player
     {
         private int movePosition;
+        private const int INITIAL_DEPTH = 0;
+        private const int POINTS = 10;
         private string x = "X";
         private string o = "O";
         private string otherLetter() => Letter == x ? o : x;
@@ -319,13 +320,14 @@ namespace TicTacToe
         }
 
         // Recursive algorithm to find best move. 
-        private int MiniMax(Board board, bool isMyTurn = true)
+        private int MiniMax(Board board, int depth = INITIAL_DEPTH,
+                            bool isMyTurn = true)
         {
             bool isWin = board.IsWin();
             // If game is over, returning score. (Flipping turn because
             // if there is a winner, it's the previous player.)
             if (isWin || board.NoPositions())
-                return Score(isWin, !isMyTurn);
+                return Score(isWin, !isMyTurn, depth);
 
             string letter;
             if (isMyTurn) letter = Letter;
@@ -339,7 +341,7 @@ namespace TicTacToe
             {
                 Board futureBoard = board.Clone();
                 futureBoard.MarkMove(new Move(position, letter));
-                scores.Add(MiniMax(futureBoard, !isMyTurn));
+                scores.Add(MiniMax(futureBoard, depth++, !isMyTurn));
             }
 
             // We assume perfect play; therefore, if it's my turn, the total
@@ -358,13 +360,15 @@ namespace TicTacToe
             return scores.Min();
         }
 
-        // Returns 10 points for a win, -10 for a loss, 0 for a draw.
-        private int Score(bool isWin, bool wasMyTurn)
+        // Returns a number of points minus the depth (num of moves ahead)
+        // for a win, a negative number of points plus the depth for a loss,
+        // and zero points for a draw.
+        private int Score(bool isWin, bool wasMyTurn, int depth)
         {
             if (isWin)
             {
-                if (wasMyTurn) return 10;
-                return -10;
+                if (wasMyTurn) return POINTS - depth;
+                return depth - POINTS;
             }
             return 0;
         }
