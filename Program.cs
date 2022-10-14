@@ -16,7 +16,7 @@ namespace TicTacToe
         Board board;
         Player currPlayer;
         Player[] players;
-        int move;
+        Move move;
         bool isWin = false;
 
         public Game()
@@ -34,9 +34,9 @@ namespace TicTacToe
             {
                 SetPlayer(i);
                 move = currPlayer.Move();
-                board.MarkMove(move, currPlayer.Letter);
+                board.MarkMove(move);
                 board.Print();
-                BlinkMove();
+                board.BlinkMove(move);
                 isWin = board.IsWin();
             }
 
@@ -121,20 +121,33 @@ namespace TicTacToe
             return choice;
         }
 
-        private void BlinkMove()
+        // private void BlinkMove(Move move)
+        // {
+        //     Thread.Sleep(200);
+        //     string[] alternate = { " ", move.Letter };
+        //     // Loop must iterate even num of times so move shows in the end.
+        //     for (int i = 0; i < 8; i++)
+        //     {
+        //         Thread.Sleep(100);
+        //         board.MarkMove(new Move(move.Position, alternate[i % 2]));
+        //         board.Print();
+        //         System.Console.WriteLine($"{move.Letter} to: {move.Position}.");
+        //     }
+        // }
+    }
+
+    class Move
+    {
+        public int Position {get; set;}
+        public string Letter {get; set;}
+
+        public Move(int position, string letter)
         {
-            Thread.Sleep(200);
-            string[] alternate = { " ", currPlayer.Letter };
-            // Loop must iterate even num of times so move shows in the end.
-            for (int i = 0; i < 8; i++)
-            {
-                Thread.Sleep(100);
-                board.MarkMove(move, alternate[i % 2]);
-                board.Print();
-                System.Console.WriteLine($"{currPlayer.Name}'s move: {move}.");
-            }
+            Position = position;
+            Letter = letter;
         }
     }
+
     class Board
     {
         private int boardLength = 3;
@@ -183,15 +196,29 @@ namespace TicTacToe
             System.Console.WriteLine("\n");
         }
 
-        public bool IsLegalMove(int move) =>
-            board.Contains(move.ToString());
+        public void BlinkMove(Move move)
+        {
+            Thread.Sleep(200);
+            string[] alternate = { " ", move.Letter };
+            // Loop must iterate even num of times so move shows in the end.
+            for (int i = 0; i < 8; i++)
+            {
+                Thread.Sleep(100);
+                MarkMove(new Move(move.Position, alternate[i % 2]));
+                Print();
+                System.Console.WriteLine($"Last move: {move.Letter} to {move.Position}.");
+            }
+        }
 
-        public void MarkMove(int position, string letter) =>
-            board[position - 1] = letter;
+        public bool IsLegalMove(int position) =>
+            board.Contains(position.ToString());
 
-        public bool NoMovesLeft() => !AvailableMoves().Any();
+        public void MarkMove(Move move) =>
+            board[move.Position - 1] = move.Letter;
 
-        public List<int> AvailableMoves()
+        public bool NoPositions() => !AvailablePositions().Any();
+
+        public List<int> AvailablePositions()
         {
             List<int> moves = new List<int>();
 
@@ -259,7 +286,7 @@ namespace TicTacToe
         public Board? GameBoard { get; set; }
         public string? Name { get; set; }
         public string? Letter { get; set; }
-        public virtual int Move() => 0;
+        public virtual Move Move() => null;
     }
 
     class HumanPlayer : Player
@@ -271,24 +298,24 @@ namespace TicTacToe
             Letter = letter;
         }
 
-        public override int Move()
+        public override Move Move()
         {
             System.Console.WriteLine($"It's {Name}'s turn.");
             System.Console.WriteLine($"Please enter a number to place an {Letter} on.");
-            int.TryParse(Console.ReadLine(), out int move);
+            int.TryParse(Console.ReadLine(), out int position);
 
-            while (!GameBoard.IsLegalMove(move))
+            while (!GameBoard.IsLegalMove(position))
             {
                 System.Console.WriteLine("Sorry, that is an illegal move. Please try again.");
-                int.TryParse(Console.ReadLine(), out move);
+                int.TryParse(Console.ReadLine(), out position);
             }
-            return move;
+            return new Move(position, Letter);
         }
     }
 
     class MiniMaxPlayer : Player
     {
-        private int move;
+        private int movePosition;
         private string x = "X";
         private string o = "O";
         private string otherLetter() => Letter == x ? o : x;
@@ -300,11 +327,11 @@ namespace TicTacToe
             Letter = letter;
         }
 
-        public override int Move()
+        public override Move Move()
         {
             System.Console.WriteLine("Computer is thinking...");
             MiniMax(GameBoard.Clone());
-            return move;
+            return new Move(movePosition, Letter);
         }
 
         // Recursive algorithm to find best move. 
@@ -313,21 +340,21 @@ namespace TicTacToe
             bool isWin = board.IsWin();
             // If game is over, returning score. (Flipping turn because
             // if there is a winner, it's the previous player.)
-            if (isWin || board.NoMovesLeft())
+            if (isWin || board.NoPositions())
                 return Score(isWin, !isMyTurn);
 
             string letter;
             if (isMyTurn) letter = Letter;
             else letter = otherLetter();
-            List<int> moves = board.AvailableMoves();
+            List<int> positions = board.AvailablePositions();
             List<int> scores = new List<int>();
 
             // Adding each possible move to a new board and adding
             // new board's score to list of scores.
-            foreach (int move in moves)
+            foreach (int position in positions)
             {
                 Board futureBoard = board.Clone();
-                futureBoard.MarkMove(move, letter);
+                futureBoard.MarkMove(new Move(position, letter));
                 scores.Add(MiniMax(futureBoard, !isMyTurn));
             }
 
@@ -340,7 +367,7 @@ namespace TicTacToe
             {
                 int maxScore = scores.Max();
                 // Setting my move to best move.
-                move = moves[scores.IndexOf(maxScore)];
+                movePosition = positions[scores.IndexOf(maxScore)];
                 return maxScore;
             };
 
@@ -368,11 +395,11 @@ namespace TicTacToe
             Letter = letter;
         }
 
-        public override int Move()
+        public override Move Move()
         {
-            List<int> moves = GameBoard.AvailableMoves();
-            int randomIndex = new Random().Next(0, moves.Count());
-            return moves[randomIndex];
+            List<int> positions = GameBoard.AvailablePositions();
+            int randomIndex = new Random().Next(0, positions.Count());
+            return new Move(positions[randomIndex], Letter);
         }
     }
 }
