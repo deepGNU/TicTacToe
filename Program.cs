@@ -14,9 +14,8 @@ namespace TicTacToe
     class Game
     {
         Board board;
-        Player currPlayer;
         Player[] players;
-        Move move;
+        Player currPlayer;
         bool isWin = false;
 
         public Game()
@@ -33,10 +32,7 @@ namespace TicTacToe
             for (int i = 0; !isWin && i < board.Area; i++)
             {
                 SetPlayer(i);
-                move = currPlayer.Move();
-                board.MarkMove(move);
-                board.Print();
-                board.BlinkMove(move);
+                board.ShowMove(currPlayer.Move());
                 isWin = board.IsWin();
             }
 
@@ -120,20 +116,6 @@ namespace TicTacToe
             Console.Clear();
             return choice;
         }
-
-        // private void BlinkMove(Move move)
-        // {
-        //     Thread.Sleep(200);
-        //     string[] alternate = { " ", move.Letter };
-        //     // Loop must iterate even num of times so move shows in the end.
-        //     for (int i = 0; i < 8; i++)
-        //     {
-        //         Thread.Sleep(100);
-        //         board.MarkMove(new Move(move.Position, alternate[i % 2]));
-        //         board.Print();
-        //         System.Console.WriteLine($"{move.Letter} to: {move.Position}.");
-        //     }
-        // }
     }
 
     class Move
@@ -196,8 +178,10 @@ namespace TicTacToe
             System.Console.WriteLine("\n");
         }
 
-        public void BlinkMove(Move move)
+        public void ShowMove(Move move)
         {
+            MarkMove(move);
+            Print();
             Thread.Sleep(200);
             string[] alternate = { " ", move.Letter };
             // Loop must iterate even num of times so move shows in the end.
@@ -220,12 +204,12 @@ namespace TicTacToe
 
         public List<int> AvailablePositions()
         {
-            List<int> moves = new List<int>();
+            List<int> positions = new List<int>();
 
             for (int i = 1; i <= boardArea; i++)
-                if (IsLegalMove(i)) moves.Add(i);
+                if (IsLegalMove(i)) positions.Add(i);
 
-            return moves;
+            return positions;
         }
 
         public bool IsWin()
