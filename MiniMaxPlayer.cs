@@ -1,22 +1,25 @@
 namespace TicTacToe
 {
-    class MiniMaxPlayer : Player
+    class MiniMaxPlayer : IPlayer
     {
         private int movePosition;
         private const int INITIAL_DEPTH = 0;
         private const int POINTS = 10;
-        private string x = "X";
-        private string o = "O";
-        private string otherLetter() => Letter == x ? o : x;
+        private const string X = "X";
+        private const string O = "O";
+        private string otherLetter() => Letter == X ? O : X;
+        public Board GameBoard { get; set; }
+        public string Name { get; set; }
+        public string Letter { get; set; }
 
         public MiniMaxPlayer(Board board, string letter)
         {
             GameBoard = board;
-            Name = "Computer";
             Letter = letter;
+            Name = "Computer";
         }
 
-        public override Move Move()
+        public Move Move()
         {
             System.Console.WriteLine("Computer is thinking...");
             MiniMax(GameBoard.Clone());

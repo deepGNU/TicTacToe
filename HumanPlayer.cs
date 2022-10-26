@@ -1,14 +1,22 @@
 namespace TicTacToe
 {
-    class HumanPlayer : Player
+    class HumanPlayer : IPlayer
     {
+        public Board GameBoard { get; set; }
+        public string Name { get; set; }
+        public string Letter { get; set; }
+
         public HumanPlayer(Board board, string letter)
         {
             GameBoard = board;
             Letter = letter;
+            Name = "Anon";
         }
 
-        public override Move Move()
+        public HumanPlayer(Board board, string letter, string name)
+                    : this(board, letter) { Name = name; }
+
+        public Move Move()
         {
             System.Console.WriteLine($"It's {Name}'s turn.");
             System.Console.WriteLine($"Please enter a number to place an {Letter} on.");

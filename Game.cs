@@ -2,17 +2,18 @@ namespace TicTacToe
 {
     class Game
     {
-        Board board;
-        Player[] players;
-        Player currPlayer;
-        bool isWin = false;
-        bool gameIsOver = false;
+        private Board board;
+        private IPlayer[] players;
+        private IPlayer currPlayer;
+        private bool isWin = false;
+        private bool gameIsOver = false;
 
         public Game()
         {
             board = new Board();
             board.Init();
-            SetPlayers();
+            players = GetPlayers();
+            currPlayer = players[0];
         }
 
         public void Run()
@@ -21,7 +22,7 @@ namespace TicTacToe
 
             for (int turn = 0; !gameIsOver && turn < board.Area; turn++)
             {
-                SetCurrPlayer(turn);
+                currPlayer = GetCurrPlayer(turn);
                 board.ShowMove(currPlayer.Move());
                 gameIsOver = isWin = board.IsWin();
             }
@@ -34,78 +35,83 @@ namespace TicTacToe
                 System.Console.WriteLine("The game is drawn.");
         }
 
-        public static int GetChoice()
+        private IPlayer GetCurrPlayer(int turn) =>
+            players[turn % players.Count()];
+
+        private IPlayer[] GetPlayers()
+        {
+            const string X = "X";
+            const string O = "O";
+            IPlayer player1 = new HumanPlayer(board, X);
+            IPlayer player2 = new HumanPlayer(board, O);
+
+            switch (ReadChoice("Would you like to play a person, or the computer?",
+                               "Play a person",
+                               "Play the computer"))
+            {
+                case 1:
+                    player1.Name = ReadName("Please enter the name of player 1:");
+                    player2.Name = ReadName("Please enter the name of player 2:");
+                    break;
+                case 2:
+                    switch (ReadChoice("Please select a level:",
+                                       "Easy (moves randomly)",
+                                       "Hard (uses minimax algorithm to play to at least a draw)"))
+                    {
+                        case 1:
+                            player2 = new RandomPlayer(board, O);
+                            break;
+                        case 2:
+                            player2 = new MiniMaxPlayer(board, O);
+                            break;
+                    }
+
+                    player1.Name = ReadName("Please enter your name:");
+                    break;
+            }
+
+            Console.Clear();
+
+            if (ReadChoice($"{player1.Name}, would you like to be {X}, or {O}? ({X} goes first.)",
+                                X, O) == 1)
+                return new IPlayer[] { player1, player2 };
+
+            // If player 1 chose O, changing letters and order of players:
+            player1.Letter = O;
+            player2.Letter = X;
+            return new IPlayer[] { player2, player1 };
+        }
+
+        public static int ReadChoice(string prompt, string choice1, string choice2)
         {
             int[] validChoices = { 1, 2 };
+            System.Console.WriteLine(prompt);
+            System.Console.WriteLine($"1. {choice1}.");
+            System.Console.WriteLine($"2. {choice2}.");
             int.TryParse(Console.ReadLine(), out int choice);
+
             while (!validChoices.Contains(choice))
             {
-                System.Console.WriteLine("Sorry, that is an invalid choice. Please try again.");
+                System.Console.WriteLine("Sorry, that is an invalid choice. Please enter '1' or '2'.");
                 int.TryParse(Console.ReadLine(), out choice);
             }
+
             Console.Clear();
             return choice;
         }
 
-        private void SetCurrPlayer(int turn) =>
-            currPlayer = players[turn % players.Count()];
-
-        private void SetPlayers()
+        private static string ReadName(string prompt)
         {
-            string x = "X";
-            string o = "O";
-            Player player1 = new HumanPlayer(board, x);
-            Player player2 = new HumanPlayer(board, o);
+            string? name;
 
-            System.Console.WriteLine("Would you like to play a person, or the computer?");
-            System.Console.WriteLine("1. Play a person.");
-            System.Console.WriteLine("2. Play the computer.");
-
-            switch (GetChoice())
+            do
             {
-                case 1:
-                    System.Console.WriteLine("Please enter the name of player 1:");
-                    player1.Name = Console.ReadLine();
-                    System.Console.WriteLine("Please enter the name of player 2:");
-                    player2.Name = Console.ReadLine();
-                    Console.Clear();
-                    break;
-                case 2:
-                    System.Console.WriteLine("Please select a level:");
-                    System.Console.WriteLine("1. Easy (moves randomly).");
-                    System.Console.WriteLine("2. Hard (uses minimax algorithm to play to at least a draw).");
+                System.Console.WriteLine(prompt);
+                name = Console.ReadLine();
+                if (name != null) name = name.Trim();
+            } while (string.IsNullOrEmpty(name));
 
-                    switch (GetChoice())
-                    {
-                        case 1:
-                            player2 = new RandomPlayer(board, o);
-                            break;
-                        case 2:
-                            player2 = new MiniMaxPlayer(board, o);
-                            break;
-                    }
-
-                    System.Console.WriteLine("Please enter your name:");
-                    player1.Name = Console.ReadLine();
-                    Console.Clear();
-                    break;
-            }
-
-            System.Console.WriteLine($"{player1.Name}, would you like to be '{x}', or '{o}'? ({x} goes first.)");
-            System.Console.WriteLine($"1. {x}");
-            System.Console.WriteLine($"2. {o}");
-
-            switch (GetChoice())
-            {
-                case 1:
-                    players = new Player[] { player1, player2 };
-                    break;
-                case 2:
-                    (player1.Letter, player2.Letter) =
-                    (player2.Letter, player1.Letter);
-                    players = new Player[] { player2, player1 };
-                    break;
-            }
+            return name;
         }
     }
 }
